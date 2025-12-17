@@ -14,19 +14,33 @@ describe("ProductForm", () => {
     db.category.delete({ where: { id: { equals: category.id } } });
   });
 
-  it("should render form fields", async () => {
-    render(<ProductForm onSubmit={vi.fn()} />, {
+  const renderComponent = (product?: Product) => {
+    render(<ProductForm product={product} onSubmit={vi.fn()} />, {
       wrapper: AllProviders,
     });
 
-    await screen.findByRole("form");
+    return {
+      waitForFormToLoad: () => screen.findByRole("form"),
+      getInputs: () => {
+        return {
+          nameInput: screen.getByPlaceholderText(/name/i),
+          priceInput: screen.getByPlaceholderText(/price/i),
+          categoryInput: screen.getByRole("combobox", { name: /category/i }),
+        };
+      },
+    };
+  };
 
-    expect(screen.getByPlaceholderText(/name/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/price/i)).toBeInTheDocument();
+  it("should render form fields", async () => {
+    const { waitForFormToLoad, getInputs } = renderComponent();
 
-    expect(
-      screen.getByRole("combobox", { name: /category/i })
-    ).toBeInTheDocument();
+    await waitForFormToLoad();
+
+    const inputs = getInputs();
+
+    expect(inputs.nameInput).toBeInTheDocument();
+    expect(inputs.priceInput).toBeInTheDocument();
+    expect(inputs.categoryInput).toBeInTheDocument();
   });
 
   it("should populate form fields when editing a products", async () => {
@@ -37,19 +51,14 @@ describe("ProductForm", () => {
       categoryId: category.id,
     };
 
-    render(<ProductForm product={product} onSubmit={vi.fn()} />, {
-      wrapper: AllProviders,
-    });
+    const { waitForFormToLoad, getInputs } = renderComponent(product);
 
-    await screen.findByRole("form");
+    await waitForFormToLoad();
 
-    expect(screen.getByPlaceholderText(/name/i)).toHaveValue(product.name);
-    expect(screen.getByPlaceholderText(/price/i)).toHaveValue(
-      product.price.toString()
-    );
+    const inputs = getInputs();
 
-    expect(
-      screen.getByRole("combobox", { name: /category/i })
-    ).toHaveTextContent(category.name);
+    expect(inputs.nameInput).toHaveValue(product.name);
+    expect(inputs.priceInput).toHaveValue(product.price.toString());
+    expect(inputs.categoryInput).toHaveTextContent(category.name);
   });
 });
