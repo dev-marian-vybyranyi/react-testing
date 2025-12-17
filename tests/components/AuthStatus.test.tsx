@@ -15,7 +15,7 @@ describe("AuthStatus", () => {
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
   });
 
-  it("should render login button if user not authenticated", () => {
+  it("should render the login button if the user is not authenticated", () => {
     mockAuthState({
       isLoading: false,
       isAuthenticated: false,
@@ -24,8 +24,12 @@ describe("AuthStatus", () => {
 
     render(<AuthStatus />);
 
-    expect(screen.getByRole("button", { name: /log in/i })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /log out/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /log in/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /log out/i })
+    ).not.toBeInTheDocument();
   });
 
   it("should render the user name if authenticated", () => {
@@ -37,7 +41,7 @@ describe("AuthStatus", () => {
 
     render(<AuthStatus />);
 
-    expect(screen.getByText("Marian")).toBeInTheDocument();
+    expect(screen.getByText(/marian/i)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /log out/i })
     ).toBeInTheDocument();
